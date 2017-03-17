@@ -66,8 +66,9 @@ namespace DesinstaladorVLibras
 
         private void button1_Click(object sender, EventArgs e)
         {
-            DialogResult result1 = MessageBox.Show("Isso pode levar alguns minutos. Por favor, aperte 'Sim' para continuar e aguarde o aviso de desinstalação concluída.", "Aviso!", MessageBoxButtons.YesNo);
-            if(result1 == DialogResult.Yes){
+            DialogResult result1 = MessageBox.Show("Isso pode levar alguns minutos. Por favor, aguarde o aviso de desinstalação concluída.", "Aviso!", MessageBoxButtons.OKCancel);
+            if(result1 == DialogResult.OK){
+                /*
                 string vlibrasPath = null;
                 string rootPath = null;
                 string pythonPath = null;
@@ -144,6 +145,7 @@ namespace DesinstaladorVLibras
                         MessageBoxDefaultButton.Button1);
                     return;
                 }
+                */
                 //DELETING CLICKONCE'S VERSIONS AND REGISTRIES
                 try{
                     var uninstallInfo = UninstallInfo.Find("Atualizador VLibras");
@@ -165,7 +167,8 @@ namespace DesinstaladorVLibras
                 //DELETE ITSELF IN 3 SECONDS
                 ProcessStartInfo info = new ProcessStartInfo();
                 info.FileName = @"cmd.exe";
-                info.Arguments = @"/C ping 1.1.1.1 -n 1 -w 3000 > Nul & Del DesinstaladorVLibras.exe";
+                string dir = Directory.GetCurrentDirectory();
+                info.Arguments = @"/C ping 1.1.1.1 -n 1 -w 3000 > Nul & cd .. & rmdir /s /q " + dir; // Del DesinstaladorVLibras.exe";
                 info.WindowStyle = ProcessWindowStyle.Hidden;
                 info.CreateNoWindow = true;
                 Process.Start(info);
