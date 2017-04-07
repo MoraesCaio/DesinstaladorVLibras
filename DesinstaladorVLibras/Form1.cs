@@ -67,40 +67,31 @@ namespace DesinstaladorVLibras
         private void button1_Click(object sender, EventArgs e)
         {
             DialogResult result1 = MessageBox.Show("Isso pode levar alguns minutos. Por favor, aguarde o aviso de desinstalação concluída.", "Aviso!", MessageBoxButtons.OKCancel);
-            if(result1 == DialogResult.OK){
-                /*
-                string vlibrasPath = null;
-                string rootPath = null;
-                string pythonPath = null;
-                string bundlesPath = null;
-                string aelius_data = null;
-                string hunpos_tagger = null;
-                string nltk_data = null;
-                string translate_data = null;
-                //RETRIEVING PATHS
-                try{
-                    //FOLDERS
-                    vlibrasPath = Environment.GetEnvironmentVariable("PATH_VLIBRAS", EnvironmentVariableTarget.User);
-                    pythonPath = Environment.GetEnvironmentVariable("PYTHONPATH", EnvironmentVariableTarget.User);
-                    if(vlibrasPath != null){
-                        rootPath = Directory.GetParent(vlibrasPath).FullName;
-                        bundlesPath = Path.Combine(rootPath, @"Bundles\");
-                    }
-                    //ENVIRONMENT VARIABLES
-                    aelius_data =    Environment.GetEnvironmentVariable("AELIUS_DATA", EnvironmentVariableTarget.User);
-                    hunpos_tagger =  Environment.GetEnvironmentVariable("HUNPOS_TAGGER", EnvironmentVariableTarget.User);
-                    nltk_data =      Environment.GetEnvironmentVariable("NLTK_DATA", EnvironmentVariableTarget.User);
-                    translate_data = Environment.GetEnvironmentVariable("TRANSLATE_DATA", EnvironmentVariableTarget.User);
-                }catch(Exception){
-                    return;
-                }
-                //DELETING SHORTCUT
-                try{
+
+            if (result1 == DialogResult.OK){
+
+                //VARIABLES
+                string vlibrasFolderPath = Environment.GetEnvironmentVariable("PATH_VLIBRAS", EnvironmentVariableTarget.User);
+                string resetEnvVarPath = Path.Combine(vlibrasFolderPath, "ResetEnvVar.exe");
+                string mainFolderPath = Directory.GetParent(vlibrasFolderPath).FullName; // %LOCALAPPDATA%/VLibras/
+                string startMenuFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
+                string lavidStartMenuFolderPath = startMenuFolderPath + @"\LAVID-UFPB"; // startMenuFolderPath/LAVID-UFPB/
+
+
+                //DELETING SHORTCUTS
+                try
+                {
                     object shDesktop = (object)"Desktop";
                     WshShell shell = new WshShell();
+
+                    //Deleting shortcut on Desktop
                     string shortcutAddress = (string)shell.SpecialFolders.Item(ref shDesktop) + @"\VLibras.lnk";
                     System.IO.File.Delete(shortcutAddress);
-                }catch(Exception ex){
+
+                    //Deleting start menu folder
+                    Directory.Delete(lavidStartMenuFolderPath, true);
+                }
+                catch (Exception ex){
                     MessageBox.Show(ex.Message,
                         "Remoção de atalho",
                         MessageBoxButtons.OK,
@@ -108,20 +99,25 @@ namespace DesinstaladorVLibras
                         MessageBoxDefaultButton.Button1);
                     return;
                 }
+
+
+                //DELETING ENVIRONMENT VARIABLES
+                ProcessStartInfo resetInfo = new ProcessStartInfo();
+                resetInfo.FileName = resetEnvVarPath;
+                resetInfo.Arguments = "-u";
+                resetInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                resetInfo.CreateNoWindow = true;
+                Process.Start(resetInfo);
+                Close();
+
+
                 //DELETING EXTRACTED FOLDERS
-                try{
-                    if(bundlesPath != null && vlibrasPath != null){
-                        deleteDirectory(bundlesPath);
-                        deleteDirectory(vlibrasPath);
-                        string[] zipPaths = Directory.GetFiles(rootPath, "*.zip");
-                        for(int i = 0; i < zipPaths.Length; i++){
-                            System.IO.File.Delete(zipPaths[i]);
-                        }
-                    }
-                    if(pythonPath != null){
-                        deleteDirectory(pythonPath);
-                    }
-                }catch(Exception ex){
+                try
+                {
+                    deleteDirectory(mainFolderPath);
+                }
+                catch (Exception ex)
+                {
                     MessageBox.Show(ex.Message,
                         "Remoção de conteúdo extraído",
                         MessageBoxButtons.OK,
@@ -129,32 +125,20 @@ namespace DesinstaladorVLibras
                         MessageBoxDefaultButton.Button1);
                     return;
                 }
-                //DELETING ENVIRONMENT VARIABLES
-                try{
-                    deleteEnvVarUSR("PATH_VLIBRAS");
-                    deleteEnvVarUSR("AELIUS_DATA");
-                    deleteEnvVarUSR("HUNPOS_TAGGER");
-                    deleteEnvVarUSR("NLTK_DATA");
-                    deleteEnvVarUSR("TRANSLATE_DATA");
-                    deleteEnvVarUSR("PYTHONPATH");
-                }catch(Exception ex){
-                    MessageBox.Show(ex.Message,
-                        "Configuração de variáveis",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Exclamation,
-                        MessageBoxDefaultButton.Button1);
-                    return;
-                }
-                */
+
+
                 //DELETING CLICKONCE'S VERSIONS AND REGISTRIES
-                try{
+                try
+                {
                     var uninstallInfo = UninstallInfo.Find("Atualizador VLibras");
                     if (uninstallInfo != null)
                     {
                         var uninstaller = new Uninstaller();
                         uninstaller.Uninstall(uninstallInfo);
                     }
-                }catch(Exception ex){
+                }
+                catch (Exception ex)
+                {
                     MessageBox.Show(ex.Message,
                         "Desinstalação do atualizador",
                         MessageBoxButtons.OK,
@@ -162,8 +146,12 @@ namespace DesinstaladorVLibras
                         MessageBoxDefaultButton.Button1);
                     return;
                 }
+
+
                 //UNINSTALL FINISHED
                 MessageBox.Show(@"Desinstalação concluída.", @"Operação concluída.");
+
+
                 //DELETE ITSELF IN 3 SECONDS
                 ProcessStartInfo info = new ProcessStartInfo();
                 info.FileName = @"cmd.exe";
@@ -173,6 +161,7 @@ namespace DesinstaladorVLibras
                 info.CreateNoWindow = true;
                 Process.Start(info);
                 Close();
+
             }
         }
     }
